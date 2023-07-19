@@ -9,7 +9,7 @@ from passlib.context import CryptContext
 from src.models import Contact, Email, Phone, Base, User
 
 
-postgres = ''
+postgres = 'postgresql+psycopg2://postgres:29an99fr@192.168.1.242:5432/db_contacts'
 
 
 engine = create_engine(postgres)
@@ -53,19 +53,3 @@ for i in range(100):
 
 session.commit()
 session.close()
-
-# _BzJ7Rze
-# u6#9VXnq
-# _3^7EjCU
-# b)4SCNLv
-# &V4jJIe5
-# @d0YDpD$
-# )(7nFCg1
-# _Ion1BtP
-# G&8Jprxr
-# $wX3WQjv
-# #093Np!@
-# +8K5&nSk
-# !74YhJ!s
-# &U9PZZkr
-# Q15(7RUx

@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi_limiter.depends import RateLimiter
 
 import src.contacts.repository as contacts_db
 from src.database import get_session
@@ -10,7 +11,7 @@ from src.auth.service import auth_service
 router = APIRouter(prefix='/contacts', tags=["contacts"])
 
 
-@router.get("/all", response_model=list[ContactOut])
+@router.get("/all", response_model=list[ContactOut], dependencies=[Depends(RateLimiter(times=2, seconds=5))])
 async def read_contacts(current_user: User = Depends(auth_service.get_current_user),
                         db: AsyncSession = Depends(get_session)):
     """
@@ -33,7 +34,7 @@ async def read_contacts(current_user: User = Depends(auth_service.get_current_us
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found.")
 
 
-@router.get("/{contact_id}", response_model=ContactOut)
+@router.get("/{contact_id}", response_model=ContactOut, dependencies=[Depends(RateLimiter(times=2, seconds=5))])
 async def read_contact(contact_id: int,
                        current_user: User = Depends(auth_service.get_current_user),
                        db: AsyncSession = Depends(get_session)):
@@ -58,7 +59,8 @@ async def read_contact(contact_id: int,
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found.")
 
 
-@router.get("/search/{prompt}", response_model=list[ContactOut])
+@router.get("/search/{prompt}", response_model=list[ContactOut],
+            dependencies=[Depends(RateLimiter(times=2, seconds=5))])
 async def search_contact(prompt: str,
                          current_user: User = Depends(auth_service.get_current_user),
                          db: AsyncSession = Depends(get_session)):
@@ -83,7 +85,7 @@ async def search_contact(prompt: str,
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found.")
 
 
-@router.post("/create", status_code=status.HTTP_201_CREATED)
+@router.post("/create", status_code=status.HTTP_201_CREATED, dependencies=[Depends(RateLimiter(times=2, seconds=5))])
 async def create_contact(contact: ContactIn,
                          current_user: User = Depends(auth_service.get_current_user),
                          db: AsyncSession = Depends(get_session)):
@@ -105,7 +107,7 @@ async def create_contact(contact: ContactIn,
     return {"detail": "Contact created sucsessfully."}
 
 
-@router.put("/update/{contact_id}")
+@router.put("/update/{contact_id}", dependencies=[Depends(RateLimiter(times=2, seconds=5))])
 async def update_contact(contact: ContactIn,
                          contact_id: int,
                          current_user: User = Depends(auth_service.get_current_user),
@@ -132,7 +134,7 @@ async def update_contact(contact: ContactIn,
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found.")
 
 
-@router.delete("/delete/{contact_id}")
+@router.delete("/delete/{contact_id}", dependencies=[Depends(RateLimiter(times=2, seconds=5))])
 async def delete_contact(contact_id: int,
                          current_user: User = Depends(auth_service.get_current_user),
                          db: AsyncSession = Depends(get_session)):

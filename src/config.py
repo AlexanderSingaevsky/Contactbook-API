@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     secret_key: str = Field()
     algorithm: str = Field()
     access_token_expire_minutes: int
+    redis_database_url: str = Field()
 
     class Config:
         env_file = ".env"

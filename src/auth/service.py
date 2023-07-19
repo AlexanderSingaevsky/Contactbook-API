@@ -1,3 +1,5 @@
+from redis.asyncio import from_url
+import pickle
 
 from jose import JWTError, jwt
 from fastapi import HTTPException, status, Depends
@@ -8,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import settings
 from src.database import get_session
+from src.database_redis import redis_db
 from src.auth import repository as repository_users
 
 
@@ -15,8 +18,8 @@ class Auth:
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
     SECRET_KEY = settings.secret_key
     ALGORITHM = settings.algorithm
-    ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes  # TODO
     oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
+
 
     def verify_password(self, plain_password, hashed_password):
         return self.pwd_context.verify(plain_password, hashed_password)
@@ -75,9 +78,16 @@ class Auth:
         except JWTError:
             raise credentials_exception
 
-        user = await repository_users.get_user_by_email(email, db)
+        redis = await redis_db.get_redis_db()
+        user = await redis.get(f"user:{email}")
         if user is None:
-            raise credentials_exception
+            user = await repository_users.get_user_by_email(email, db)
+            if user is None:
+                raise credentials_exception
+            await redis.set(f"user:{email}", pickle.dumps(user))
+            await redis.expire(f"user:{email}", 900)
+        else:
+            user = pickle.loads(user)
         return user
 
 

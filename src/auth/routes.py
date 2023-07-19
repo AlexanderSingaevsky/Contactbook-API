@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, status, Security
 from fastapi.security import OAuth2PasswordRequestForm, HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi_limiter.depends import RateLimiter
 
 from src.database import get_session
 from src.auth.schemas import UserModel, UserResponse, TokenModel
@@ -10,8 +11,11 @@ from src.auth.service import auth_service
 router = APIRouter(prefix='/auth', tags=["auth"])
 security = HTTPBearer()
 
+dependencies = [Depends(RateLimiter(times=2, seconds=5))]
 
-@router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+
+@router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED,
+             dependencies=[Depends(RateLimiter(times=2, seconds=5))])
 async def signup(body: UserModel, db: AsyncSession = Depends(get_session)):
     """
        ## Create a new user account.
@@ -35,7 +39,7 @@ async def signup(body: UserModel, db: AsyncSession = Depends(get_session)):
     return {"user": new_user, "detail": "User successfully created"}
 
 
-@router.post("/login", response_model=TokenModel)
+@router.post("/login", response_model=TokenModel, dependencies=[Depends(RateLimiter(times=2, seconds=5))])
 async def login(body: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_session)):
     """
         ## Log in to the user account and generate access and refresh tokens.
@@ -63,7 +67,8 @@ async def login(body: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = 
     return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
 
 
-@router.get('/refresh_token', response_model=TokenModel, include_in_schema=False)
+@router.get('/refresh_token', response_model=TokenModel, include_in_schema=False,
+            dependencies=[Depends(RateLimiter(times=2, seconds=5))])
 async def refresh_token(credentials: HTTPAuthorizationCredentials = Security(security),
                         db: AsyncSession = Depends(get_session)):
     """

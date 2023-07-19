@@ -29,13 +29,13 @@ async def search_in_contacts(prompt: str, current_user: User, session: AsyncSess
         results = await session.execute(
             select(Contact).where(
                 and_(
+                    Contact.owner_id == current_user.id,
                     or_(
                         func.lower(Contact.first_name).contains(prompt_lower),
                         func.lower(Contact.last_name).contains(prompt_lower),
                         Contact.emails.any(func.lower(Email.address).contains(prompt_lower)),
                         Contact.phones.any(func.lower(Phone.number).contains(prompt_lower))
-                    ),
-                    Contact.owner_id == current_user.id
+                    )
                 )
             )
         )
