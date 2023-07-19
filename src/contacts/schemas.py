@@ -23,4 +23,4 @@ class ContactOut(ContactIn):
     phones: list[PhoneOut] | None = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True

@@ -11,4 +11,4 @@ class PhoneOut(PhoneIn):
     # contact_id: int = Field()
 
     class Config:
-        orm_mode = True
+        from_attributes = True

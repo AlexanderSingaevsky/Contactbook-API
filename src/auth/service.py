@@ -8,18 +8,17 @@ from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.config import settings
+from src.config import settings as s
 from src.database import get_session
 from src.database_redis import redis_db
 from src.auth import repository as repository_users
 
 
 class Auth:
+    secret_key = s.secret_key
+    algorithm = s.algorithm
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-    SECRET_KEY = settings.secret_key
-    ALGORITHM = settings.algorithm
     oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
-
 
     def verify_password(self, plain_password, hashed_password):
         return self.pwd_context.verify(plain_password, hashed_password)
@@ -35,7 +34,7 @@ class Auth:
         else:
             expire = datetime.utcnow() + timedelta(minutes=15)
         to_encode.update({"iat": datetime.utcnow(), "exp": expire, "scope": "access_token"})
-        encoded_access_token = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
+        encoded_access_token = jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
         return encoded_access_token
 
     # define a function to generate a new refresh token
@@ -46,12 +45,12 @@ class Auth:
         else:
             expire = datetime.utcnow() + timedelta(days=7)
         to_encode.update({"iat": datetime.utcnow(), "exp": expire, "scope": "refresh_token"})
-        encoded_refresh_token = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
+        encoded_refresh_token = jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
         return encoded_refresh_token
 
     async def decode_refresh_token(self, refresh_token: str):
         try:
-            payload = jwt.decode(refresh_token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
+            payload = jwt.decode(refresh_token, self.secret_key, algorithms=[self.algorithm])
             if payload['scope'] == 'refresh_token':
                 email = payload['sub']
                 return email
@@ -68,7 +67,7 @@ class Auth:
 
         try:
             # Decode JWT
-            payload = jwt.decode(token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
+            payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
             if payload['scope'] == 'access_token':
                 email = payload["sub"]
                 if email is None:

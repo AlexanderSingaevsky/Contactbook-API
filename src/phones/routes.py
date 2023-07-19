@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi_limiter.depends import RateLimiter
 
 import src.phones.repository as phones_db
 from src.database import get_session
@@ -7,11 +8,10 @@ from src.phones.schemas import PhoneIn, PhoneOut
 from src.auth.service import auth_service
 from src.models import User
 
-
 router = APIRouter(prefix='/phones', tags=["phones"])
 
 
-@router.get("/all/{contact_id}", response_model=list[PhoneOut])
+@router.get("/all/{contact_id}", response_model=list[PhoneOut], dependencies=[Depends(RateLimiter(times=2, seconds=5))])
 async def read_phones(contact_id: int,
                       current_user: User = Depends(auth_service.get_current_user),
                       db: AsyncSession = Depends(get_session)):
@@ -37,7 +37,8 @@ async def read_phones(contact_id: int,
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Phones not found.")
 
 
-@router.post("/create/{contact_id}", status_code=status.HTTP_201_CREATED)
+@router.post("/create/{contact_id}", status_code=status.HTTP_201_CREATED,
+             dependencies=[Depends(RateLimiter(times=2, seconds=5))])
 async def create_phone(contact_id: int,
                        phone: PhoneIn,
                        current_user: User = Depends(auth_service.get_current_user),
@@ -64,7 +65,7 @@ async def create_phone(contact_id: int,
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found.")
 
 
-@router.put("/update/{contact_id}/{phone_id}")
+@router.put("/update/{contact_id}/{phone_id}", dependencies=[Depends(RateLimiter(times=2, seconds=5))])
 async def update_phone(new_phone: PhoneIn,
                        contact_id: int,
                        phone_id: int,
@@ -94,7 +95,7 @@ async def update_phone(new_phone: PhoneIn,
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Phone not found.")
 
 
-@router.delete("/delete/{contact_id}/{phone_id}")
+@router.delete("/delete/{contact_id}/{phone_id}", dependencies=[Depends(RateLimiter(times=2, seconds=5))])
 async def delete_phone(contact_id: int,
                        phone_id: int,
                        current_user: User = Depends(auth_service.get_current_user),

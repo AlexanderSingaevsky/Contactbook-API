@@ -13,4 +13,4 @@ class EmailOut(EmailIn):
     # contact_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True

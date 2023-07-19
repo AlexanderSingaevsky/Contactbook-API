@@ -8,20 +8,22 @@ packages = [{include = "fastapi_addressbook"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-sqlalchemy = "^2.0.17"
-fastapi = "^0.98.0"
-uvicorn = {extras = ["standard"], version = "^0.22.0"}
+pydantic = {extras = ["email"], version = "^2.0.3"}
+fastapi = "^0.100.0"
+sqlalchemy = "^2.0.19"
+uvicorn = {extras = ["standart"], version = "^0.23.1"}
 psycopg2 = "^2.9.6"
-asyncpg = "^0.27.0"
-pydantic = {extras = ["email"], version = "^1.10.9"}
-faker = "^18.11.2"
+asyncpg = "^0.28.0"
+redis = "^4.6.0"
 alembic = "^1.11.1"
-python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+python-jose = "^3.3.0"
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 python-multipart = "^0.0.6"
 libgravatar = "^1.0.4"
-redis = "^4.6.0"
 fastapi-limiter = "^0.1.5"
+fastapi-mail = "^1.4.1"
+faker = "^19.1.0"
+pydantic-settings = "^2.0.2"
 
 
 [build-system]

@@ -1,13 +1,15 @@
 import asyncio
 
-from src.config import settings
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.config import settings as s
+
 from src.models import Base
 
-SQLALCHEMY_DATABASE_URL = settings.sqlalchemy_database_url
-engine = create_async_engine(SQLALCHEMY_DATABASE_URL, echo=False)
+postgres_database_url = f'postgresql+asyncpg://{s.postgres_user}:{s.postgres_password}' \
+                        f'@{s.postgres_host}:{s.postgres_port}/{s.postgres_db}'
+engine = create_async_engine(postgres_database_url, echo=False)
 async_session = async_sessionmaker(engine, expire_on_commit=False)
 
 
@@ -25,6 +27,7 @@ async def database_create():
 
 async def main():
     pass
+
 
 if __name__ == '__main__':
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())

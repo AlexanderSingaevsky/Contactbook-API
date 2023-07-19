@@ -1,6 +1,6 @@
 import redis.asyncio as redis
 
-from src.config import settings
+from src.config import settings as s
 
 
 class RedisConnector:
@@ -15,6 +15,5 @@ class RedisConnector:
         return self.redis
 
 
-redis_db = RedisConnector(settings.redis_database_url)
-
-
+redis_database_url = f'redis://{s.redis_host}:{s.redis_port}'
+redis_db = RedisConnector(redis_database_url)
