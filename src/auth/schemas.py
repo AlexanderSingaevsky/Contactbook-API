@@ -1,11 +1,11 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 from datetime import datetime
 
 
 class UserModel(BaseModel):
     username: str = Field(min_length=5, max_length=16)
-    email: str
-    password: str = Field(min_length=6, max_length=10)
+    email: EmailStr
+    password: str = Field()
 
 
 class UserDb(BaseModel):
@@ -28,3 +28,6 @@ class TokenModel(BaseModel):
     access_token: str = "Access Token"
     refresh_token: str = "Refresh Token"
     token_type: str = "bearer"
+
+
+

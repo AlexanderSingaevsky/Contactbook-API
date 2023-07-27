@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, Depends, status
 from fastapi_limiter.depends import RateLimiter
 
 import src.contacts.repository as contacts_db
-from src.database import get_session
+from src.database_postgres import get_session
 from src.contacts.schemas import ContactOut, ContactIn
 from src.models import User
 from src.auth.service import auth_service

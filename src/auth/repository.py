@@ -20,7 +20,7 @@ async def create_user(body: UserModel, session: AsyncSession) -> User:
         avatar = g.get_image()
     except Exception as e:
         print(e)
-    new_user = User(**body.dict(), avatar=avatar)
+    new_user = User(**body.model_dump(), avatar=avatar)
     async with session.begin():
         session.add(new_user)
     return new_user

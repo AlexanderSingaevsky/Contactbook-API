@@ -1,5 +1,5 @@
 from datetime import date
-from sqlalchemy import Integer, String, Text, Date, DateTime, func
+from sqlalchemy import Integer, String, Boolean, Text, Date, DateTime, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.ext.asyncio import AsyncAttrs
@@ -52,11 +52,10 @@ class User(Base):
     password: Mapped[str] = mapped_column(String(255), nullable=False)
     created_at: Mapped[DateTime] = mapped_column('crated_at', DateTime, default=func.now())
     avatar: Mapped[str] = mapped_column(String(255), nullable=True)
+    is_confirmed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     refresh_token: Mapped[str] = mapped_column(String(255), nullable=True)
     contacts: Mapped[Contact] = relationship("Contact", back_populates="owner", lazy='noload', cascade="all, delete")
 
 
 if __name__ == "__main__":
     pass
-
-

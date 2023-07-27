@@ -1,4 +1,3 @@
-from redis.asyncio import from_url
 import pickle
 
 from jose import JWTError, jwt
@@ -9,7 +8,7 @@ from datetime import datetime, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import settings as s
-from src.database import get_session
+from src.database_postgres import get_session
 from src.database_redis import redis_db
 from src.auth import repository as repository_users
 
@@ -27,7 +26,7 @@ class Auth:
         return self.pwd_context.hash(password)
 
     # define a function to generate a new access token
-    async def create_access_token(self, data: dict, expires_delta: float| None = None):
+    async def create_access_token(self, data: dict, expires_delta: float | None = None):
         to_encode = data.copy()
         if expires_delta:
             expire = datetime.utcnow() + timedelta(seconds=expires_delta)
@@ -89,5 +88,25 @@ class Auth:
             user = pickle.loads(user)
         return user
 
+    async def create_email_token(self, data: dict):
+        to_encode = data.copy()
+        expire = datetime.utcnow() + timedelta(days=7)
+        to_encode.update({"iat": datetime.utcnow(), "exp": expire})
+        token = jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
+        return token
+
+    async def get_email_from_token(self, token: str):
+        try:
+            payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
+            email = payload["sub"]
+            return email
+        except JWTError as e:
+            print(e)
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                                detail="Invalid token for email verification")
+
 
 auth_service = Auth()
+
+if __name__ == "__main__":
+    pass

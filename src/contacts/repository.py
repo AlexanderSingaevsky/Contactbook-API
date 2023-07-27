@@ -44,7 +44,7 @@ async def search_in_contacts(prompt: str, current_user: User, session: AsyncSess
 
 async def add_contact(contact: ContactIn, current_user: User, session: AsyncSession):
     async with session.begin():
-        contact_to_add = Contact(**contact.dict(), owner_id=current_user.id)
+        contact_to_add = Contact(**contact.model_dump(), owner_id=current_user.id)
         session.add(contact_to_add)
 
 
@@ -63,7 +63,7 @@ async def update_contact(contact_update: ContactIn,
         )
         contact = contact.scalars().unique().one_or_none()
         if contact:
-            contact_data = contact_update.dict(exclude_unset=True)
+            contact_data = contact_update.mode(exclude_unset=True)
             for key, value in contact_data.items():
                 setattr(contact, key, value)
             await session.flush()

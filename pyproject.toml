@@ -24,6 +24,7 @@ fastapi-limiter = "^0.1.5"
 fastapi-mail = "^1.4.1"
 faker = "^19.1.0"
 pydantic-settings = "^2.0.2"
+cloudinary = "^1.33.0"
 
 
 [build-system]
