@@ -18,24 +18,8 @@ dependencies = [Depends(RateLimiter(times=2, seconds=5))]
 
 @router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED,
              dependencies=[Depends(RateLimiter(times=2, seconds=5))])
-async def signup(body: UserModel,
-                 background_tasks: BackgroundTasks,
-                 request: Request,
+async def signup(body: UserModel, background_tasks: BackgroundTasks, request: Request,
                  db: AsyncSession = Depends(get_session)):
-    """
-       ## Create a new user account.
-
-       ### Args:
-           body (UserModel): The user information for creating the account.
-           db (AsyncSession): The database session.
-
-       ### Returns:
-           UserResponse: The newly created user's information.
-
-       ### Raises:
-           HTTPException: If an account with the provided email already exists.
-               Returns HTTP status code 409 (Conflict).
-       """
     exist_user = await repository_users.get_user_by_email(body.email, db)
     if exist_user:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Account already exists")
@@ -47,20 +31,6 @@ async def signup(body: UserModel,
 
 @router.post("/login", response_model=TokenModel, dependencies=[Depends(RateLimiter(times=2, seconds=5))])
 async def login(body: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_session)):
-    """
-        ## Log in to the user account and generate access and refresh tokens.
-
-        ### Args:
-            body (OAuth2PasswordRequestForm): The login request body containing username (email) and password.
-            db (AsyncSession): The database session.
-
-        ### Returns:
-            TokenModel: The access and refresh tokens.
-
-        ### Raises:
-            HTTPException: If the provided email is invalid or the password is incorrect.
-                Returns HTTP status code 401 (Unauthorized).
-        """
     user = await repository_users.get_user_by_email(body.username, db)
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email")
@@ -79,20 +49,6 @@ async def login(body: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = 
             dependencies=[Depends(RateLimiter(times=2, seconds=5))])
 async def refresh_token(credentials: HTTPAuthorizationCredentials = Security(security),
                         db: AsyncSession = Depends(get_session)):
-    """
-        ## Refresh the access token using a valid refresh token.
-
-        ### Args:
-            credentials (HTTPAuthorizationCredentials): The authorization credentials containing the refresh token.
-            db (AsyncSession): The database session.
-
-        ### Returns:
-            TokenModel: The refreshed access and refresh tokens.
-
-        ### Raises:
-            HTTPException: If the provided refresh token is invalid or expired.
-                Returns HTTP status code 401 (Unauthorized).
-        """
     token = credentials.credentials
     email = await auth_service.decode_refresh_token(token)
     user = await repository_users.get_user_by_email(email, db)

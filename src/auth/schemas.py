@@ -28,6 +28,3 @@ class TokenModel(BaseModel):
     access_token: str = "Access Token"
     refresh_token: str = "Refresh Token"
     token_type: str = "bearer"
-
-
-

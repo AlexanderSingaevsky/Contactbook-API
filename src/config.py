@@ -32,3 +32,7 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+sqlalchemy_database_url = (f'postgresql+asyncpg://{settings.postgres_user}:'
+                           f'{settings.postgres_password}@{settings.postgres_host}:'
+                           f'{settings.postgres_port}/{settings.postgres_db}?async_fallback=True')
