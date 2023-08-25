@@ -46,6 +46,7 @@ async def add_contact(contact: ContactIn, current_user: User, session: AsyncSess
     async with session.begin():
         contact_to_add = Contact(**contact.model_dump(), owner_id=current_user.id)
         session.add(contact_to_add)
+        return contact_to_add
 
 
 async def update_contact(contact_update: ContactIn,
@@ -63,9 +64,10 @@ async def update_contact(contact_update: ContactIn,
         )
         contact = contact.scalars().unique().one_or_none()
         if contact:
-            contact_data = contact_update.mode(exclude_unset=True)
-            for key, value in contact_data.items():
-                setattr(contact, key, value)
+            contact.first_name = contact_update.first_name
+            contact.last_name = contact_update.last_name
+            contact.birthday = contact_update.birthday
+            contact.description = contact_update.description
             await session.flush()
     return contact
 
