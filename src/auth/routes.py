@@ -16,8 +16,7 @@ security = HTTPBearer()
 dependencies = [Depends(RateLimiter(times=2, seconds=5))]
 
 
-@router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED,
-             dependencies=[Depends(RateLimiter(times=2, seconds=5))])
+@router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def signup(body: UserModel, background_tasks: BackgroundTasks, request: Request,
                  db: AsyncSession = Depends(get_session)):
     """
@@ -57,7 +56,7 @@ async def signup(body: UserModel, background_tasks: BackgroundTasks, request: Re
     return {"user": new_user, "detail": "User successfully created. Check your email for confirmation."}
 
 
-@router.post("/login", response_model=TokenModel, dependencies=[Depends(RateLimiter(times=2, seconds=5))])
+@router.post("/login", response_model=TokenModel)
 async def login(body: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_session)):
     """
     .. http:post:: /login
@@ -97,8 +96,7 @@ async def login(body: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = 
         return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
 
 
-@router.get('/refresh_token', response_model=TokenModel,
-            dependencies=[Depends(RateLimiter(times=2, seconds=5))])
+@router.get('/refresh_token', response_model=TokenModel)
 async def refresh_token(credentials: HTTPAuthorizationCredentials = Security(security),
                         db: AsyncSession = Depends(get_session)):
     token = credentials.credentials

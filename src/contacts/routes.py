@@ -11,7 +11,7 @@ from src.auth.service import auth_service
 router = APIRouter(prefix='/contacts', tags=["contacts"])
 
 
-@router.get("/read", response_model=list[ContactOut], dependencies=[Depends(RateLimiter(times=2, seconds=5))])
+@router.get("/read", response_model=list[ContactOut])
 async def read_contacts(current_user: User = Depends(auth_service.get_current_user),
                         db: AsyncSession = Depends(get_session)):
     """
@@ -39,7 +39,7 @@ async def read_contacts(current_user: User = Depends(auth_service.get_current_us
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found.")
 
 
-@router.get("/contact={contact_id}", response_model=ContactOut, dependencies=[Depends(RateLimiter(times=2, seconds=5))])
+@router.get("/contact={contact_id}", response_model=ContactOut)
 async def read_contact(contact_id: int, current_user: User = Depends(auth_service.get_current_user),
                        db: AsyncSession = Depends(get_session)):
     contact = await contacts_db.get_contact(contact_id, current_user, db)
@@ -48,8 +48,7 @@ async def read_contact(contact_id: int, current_user: User = Depends(auth_servic
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found.")
 
 
-@router.get("/search/string={search_string}", response_model=list[ContactOut],
-            dependencies=[Depends(RateLimiter(times=2, seconds=5))])
+@router.get("/search/string={search_string}", response_model=list[ContactOut])
 async def search_contact(search_string: str, current_user: User = Depends(auth_service.get_current_user),
                          db: AsyncSession = Depends(get_session)):
     """
@@ -79,7 +78,7 @@ async def search_contact(search_string: str, current_user: User = Depends(auth_s
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found.")
 
 
-@router.post("/create", status_code=status.HTTP_201_CREATED, dependencies=[Depends(RateLimiter(times=2, seconds=5))])
+@router.post("/create", status_code=status.HTTP_201_CREATED)
 async def create_contact(contact: ContactIn, current_user: User = Depends(auth_service.get_current_user),
                          db: AsyncSession = Depends(get_session)):
     """
@@ -107,7 +106,7 @@ async def create_contact(contact: ContactIn, current_user: User = Depends(auth_s
     return {"detail": "Contact created sucsessfully."}
 
 
-@router.put("/update/contact={contact_id}", dependencies=[Depends(RateLimiter(times=2, seconds=5))])
+@router.put("/update/contact={contact_id}")
 async def update_contact(contact: ContactIn, contact_id: int,
                          current_user: User = Depends(auth_service.get_current_user),
                          db: AsyncSession = Depends(get_session)):
@@ -140,7 +139,7 @@ async def update_contact(contact: ContactIn, contact_id: int,
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found.")
 
 
-@router.delete("/delete/contact={contact_id}", dependencies=[Depends(RateLimiter(times=2, seconds=5))])
+@router.delete("/delete/contact={contact_id}")
 async def delete_contact(contact_id: int, current_user: User = Depends(auth_service.get_current_user),
                          db: AsyncSession = Depends(get_session)):
     """

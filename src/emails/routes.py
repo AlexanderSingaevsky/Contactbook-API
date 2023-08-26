@@ -11,7 +11,7 @@ from src.models import User
 router = APIRouter(prefix='/emails', tags=["emails"])
 
 
-@router.get("/read/contact={contact_id}", response_model=list[EmailOut], dependencies=[Depends(RateLimiter(times=2, seconds=5))])
+@router.get("/read/contact={contact_id}", response_model=list[EmailOut])
 async def read_emails(contact_id: int, current_user: User = Depends(auth_service.get_current_user),
                       db: AsyncSession = Depends(get_session)):
     """
@@ -41,8 +41,7 @@ async def read_emails(contact_id: int, current_user: User = Depends(auth_service
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Emails not found.")
 
 
-@router.post("/create/contact={contact_id}", status_code=status.HTTP_201_CREATED,
-             dependencies=[Depends(RateLimiter(times=2, seconds=5))])
+@router.post("/create/contact={contact_id}", status_code=status.HTTP_201_CREATED)
 async def create_email(contact_id: int, email: EmailIn, current_user: User = Depends(auth_service.get_current_user),
                        db: AsyncSession = Depends(get_session)):
     """
@@ -75,7 +74,7 @@ async def create_email(contact_id: int, email: EmailIn, current_user: User = Dep
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found.")
 
 
-@router.put("/update/contact={contact_id}&email={email_id}", dependencies=[Depends(RateLimiter(times=2, seconds=5))])
+@router.put("/update/contact={contact_id}&email={email_id}")
 async def update_email(new_email: EmailIn, contact_id: int, email_id: int,
                        current_user: User = Depends(auth_service.get_current_user),
                        db: AsyncSession = Depends(get_session)):
@@ -110,7 +109,7 @@ async def update_email(new_email: EmailIn, contact_id: int, email_id: int,
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Email not found.")
 
 
-@router.delete("/delete/contact={contact_id}&email={email_id}", dependencies=[Depends(RateLimiter(times=2, seconds=5))])
+@router.delete("/delete/contact={contact_id}&email={email_id}")
 async def delete_email(contact_id: int, email_id: int, current_user: User = Depends(auth_service.get_current_user),
                        db: AsyncSession = Depends(get_session)):
     """

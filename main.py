@@ -45,12 +45,7 @@ async def add_process_time_header(request: Request, call_next):
     return response
 
 
-@app.on_event("startup")
-async def startup():
-    await FastAPILimiter.init(await redis_db.get_redis_db())
-
-
-@app.get("/", dependencies=[Depends(RateLimiter(times=2, seconds=5))])
+@app.get("/")
 def read_root():
     return {"message": "Hello World"}
 
