@@ -20,6 +20,35 @@ router = APIRouter(prefix='/user', tags=["user"])
 @router.patch("/set_password", dependencies=[Depends(RateLimiter(times=2, seconds=5))])
 async def set_password(body: NewPasswordSchema, current_user: User = Depends(auth_service.get_current_user),
                        db: AsyncSession = Depends(get_session), rdb: Redis = Depends(redis_db.get_redis_db)):
+    """
+    .. http:patch:: /set_password
+
+       Set a new password for the currently authenticated user.
+
+       :param body: The input data containing the current password, the new password, and its confirmation.
+       :type body: NewPasswordSchema
+       :param current_user: The authenticated user making the request. If not provided, the user will be obtained from the authentication service.
+       :type current_user: User, optional
+       :param db: The asynchronous database session to be used for the operation. If not provided, a session will be generated using the `get_session` dependency.
+       :type db: AsyncSession, optional
+       :param rdb: Redis database instance used to delete the user's session.
+       :type rdb: Redis, optional
+       :return: A message indicating the status of the password update process.
+       :rtype: dict
+       :raises HTTPException:
+           - 400 Bad Request if the two provided new passwords do not match or if the current password is incorrect.
+
+       **Notes**:
+
+       The function verifies the correctness of the provided current password. If it's correct, the user's password is updated in the database and the user's session is deleted from Redis.
+
+       **Dependencies**:
+
+       - RateLimiter: Limits the number of requests to 2 every 5 seconds.
+       - get_current_user: Dependency to get the currently authenticated user.
+       - get_session: Dependency to get the current asynchronous database session.
+       - redis_db.get_redis_db: Dependency to get the Redis database instance.
+    """
     if body.new_password != body.r_new_password:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Passwords do not match.")
     elif not auth_service.verify_password(body.current_password, current_user.password):
@@ -34,6 +63,34 @@ async def set_password(body: NewPasswordSchema, current_user: User = Depends(aut
 @router.patch('/set_avatar', dependencies=[Depends(RateLimiter(times=2, seconds=5))])
 async def update_user_avatar(file: UploadFile = File(), current_user: User = Depends(auth_service.get_current_user),
                              db: AsyncSession = Depends(get_session)):
+    """
+    .. http:patch:: /set_avatar
+
+       Update or set the avatar of the currently authenticated user.
+
+       :param file: The uploaded file containing the new avatar image. If not provided, a default file input will be used.
+       :type file: UploadFile, optional
+       :param current_user: The authenticated user making the request. If not provided, the user will be obtained from the authentication service.
+       :type current_user: User, optional
+       :param db: The asynchronous database session to be used for the operation. If not provided, a session will be generated using the `get_session` dependency.
+       :type db: AsyncSession, optional
+       :return: A message indicating the status of the avatar update process.
+       :rtype: dict
+
+       **Notes**:
+
+       The function uploads the new avatar image to Cloudinary under a specific public ID constructed using the authenticated user's username. The image is then resized and cropped to fit a standard avatar size. The constructed image URL is updated in the database for the current user.
+
+       **Dependencies**:
+
+       - RateLimiter: Limits the number of requests to 2 every 5 seconds.
+       - get_current_user: Dependency to get the currently authenticated user.
+       - get_session: Dependency to get the current asynchronous database session.
+
+       **External Services**:
+
+       - Cloudinary: Used for image uploading, manipulation, and delivery.
+    """
     cloudinary.config(
         cloud_name=settings.cloudinary_name,
         api_key=settings.cloudinary_api_key,
