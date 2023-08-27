@@ -21,14 +21,14 @@ async def db():
 
 @pytest.fixture(scope="module")
 def client(db):
-    async def override_get_db():
+    async def mock_get_db():
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.drop_all)
             await conn.run_sync(Base.metadata.create_all)
         async with async_session() as session:
             yield session
 
-    app.dependency_overrides[get_session] = override_get_db
+    app.dependency_overrides[get_session] = mock_get_db
 
     yield TestClient(app)
 
